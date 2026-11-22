@@ -25,10 +25,63 @@
 const { app, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const { execFile } = require('child_process');
 const { asBigInt, nonzero, pickWorkerw } = require('./workerw-find');
 
 let fns = null; // user32 bindings via koffi, cached after a successful init
+
+// ---------------------------------------------------------------------------
+// Windows-only guard.
+//
+// Freewave targets Windows: the WorkerW wallpaper trick, the SMTC poller and
+// the system-audio loopback all need win32. Historically this app "didn't run
+// properly" when its files were carried over from a Linux/macOS machine (git
+// clones on WSL, shared folders, ...): every .ps1 helper then has LF line
+// endings and the *executable bit missing*. PowerShell 5.1 (powershell.exe)
+// tolerates neither — it refuses to run a script without the execute bit —
+// so both attach paths silently failed and the visualizer never appeared.
+// normalizeScripts() repairs both problems at startup.
+// ---------------------------------------------------------------------------
+
+/** Convert LF-only content to CRLF (what powershell.exe expects on Windows). */
+function toCrlf(text) {
+  return String(text).replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+}
+
+/**
+ * Read a bundled PowerShell script, normalize it to CRLF + UTF-8 BOM (the BOM
+ * makes Windows PowerShell 5.1 read UTF-8 non-ASCII characters correctly),
+ * and write it to `dst` with the owner-execute bit set. Returns `dst`.
+ */
+function writeNormalizedScript(srcPath, dstPath) {
+  let text = fs.readFileSync(srcPath, 'utf8');
+  text = toCrlf(text);
+  if (!text.startsWith('\uFEFF')) text = '\uFEFF' + text;
+  fs.writeFileSync(dstPath, text, 'utf8');
+  try {
+    // Restore the executable bit that is lost when these files are created or
+    // copied on non-Windows filesystems (WSL mounts, network shares, zip...).
+    fs.chmodSync(dstPath, 0o700);
+  } catch {}
+  return dstPath;
+}
+
+/**
+ * Ensure scripts/<name>.ps1 exists in normalized form next to the bundle and
+ * return its path. Used as a last-resort fallback location when copying into
+ * userData fails (e.g. read-only install dir combined with locked profile).
+ */
+function normalizeBundledScript(name) {
+  const src = path.join(__dirname, '..', 'scripts', name);
+  const dst = path.join(os.tmpdir(), 'freewave-' + name);
+  try {
+    return writeNormalizedScript(src, dst);
+  } catch (err) {
+    console.error('[wallpaper] cannot normalize ' + name + ':', err.message);
+    return src; // best-effort: run the original anyway
+  }
+}
 
 /**
  * Bind user32 through koffi. Idempotent and side-effect free: only plain
@@ -146,15 +199,21 @@ let psScriptPath = null;
 /**
  * Copy attach.ps1 out of the app bundle (asar-safe) into userData so that
  * powershell.exe — a process outside Electron — can read it. Mirrors the
- * pattern used for smtc.ps1.
+ * pattern used for smtc.ps1. The copy is normalized for Windows: CRLF line
+ * endings, UTF-8 BOM and an executable bit (see writeNormalizedScript),
+ * because PowerShell 5.1 refuses to run scripts created on Linux filesystems.
  */
 function materializeAttachScript() {
   if (psScriptPath && fs.existsSync(psScriptPath)) return psScriptPath;
   const src = path.join(__dirname, '..', 'scripts', 'attach.ps1');
   const dst = path.join(app.getPath('userData'), 'attach.ps1');
-  fs.copyFileSync(src, dst);
-  psScriptPath = dst;
-  return dst;
+  try {
+    writeNormalizedScript(src, dst);
+    psScriptPath = dst;
+  } catch (err) {
+    psScriptPath = normalizeBundledScript('attach.ps1');
+  }
+  return psScriptPath;
 }
 
 /**

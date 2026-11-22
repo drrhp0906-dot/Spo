@@ -27,16 +27,42 @@ class SmtcPoller extends EventEmitter {
     this.fatalOnce = false;
   }
 
-  /** Copy the .ps1 out of the app bundle (asar-safe) to userData. */
+  /**
+   * Copy the .ps1 out of the app bundle (asar-safe) to userData — normalized
+   * for Windows: CRLF line endings, UTF-8 BOM and an executable bit. When a
+   * repo was cloned/copied on a Linux filesystem (WSL, shared folders), the
+   * bundled script has LF endings and no exec bit, and powershell.exe refuses
+   * to run it ("cannot execute the file ... not digitally signed" / garbage
+   * parse errors). That is why SMTC now-playing silently stopped working on
+   * such installs; re-writing the copy here repairs it at every launch.
+   */
   materializeScript(userDataDir) {
     const src = path.join(__dirname, '..', 'scripts', 'smtc.ps1');
     const dst = path.join(userDataDir, 'smtc.ps1');
     try {
-      fs.copyFileSync(src, dst);
+      fs.mkdirSync(userDataDir, { recursive: true });
+    } catch {}
+    try {
+      let text = fs.readFileSync(src, 'utf8');
+      text = text.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+      if (!text.startsWith('\uFEFF')) text = '\uFEFF' + text;
+      fs.writeFileSync(dst, text, 'utf8');
+      try { fs.chmodSync(dst, 0o700); } catch {}
       return dst;
     } catch (err) {
       console.error('[smtc] cannot materialize smtc.ps1:', err.message);
-      return src; // works in dev (non-asar)
+      try {
+        // Last resort: normalize into the temp dir instead of userData.
+        const tmp = path.join(require('os').tmpdir(), 'freewave-smtc.ps1');
+        let text = fs.readFileSync(src, 'utf8');
+        text = text.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+        if (!text.startsWith('\uFEFF')) text = '\uFEFF' + text;
+        fs.writeFileSync(tmp, text, 'utf8');
+        try { fs.chmodSync(tmp, 0o700); } catch {}
+        return tmp;
+      } catch {
+        return src; // works in dev (non-asar) if the file itself is runnable
+      }
     }
   }
 
