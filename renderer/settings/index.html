@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' file: data:; script-src 'self'" />
+  <title>Freewave Settings</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header id="titlebar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-name">Freewave</span>
+      <span class="brand-tag">free forever</span>
+    </div>
+    <div class="win-controls">
+      <button id="win-min" title="Minimize">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button id="win-close" title="Close">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="layout">
+    <nav id="sidebar">
+      <button class="nav-btn active" data-tab="visualizer">Visualizer</button>
+      <button class="nav-btn" data-tab="theme">Theme</button>
+      <button class="nav-btn" data-tab="overlays">Overlays</button>
+      <button class="nav-btn" data-tab="audio">Audio</button>
+      <button class="nav-btn" data-tab="general">General</button>
+      <div class="sidebar-foot">
+        <p>Watch your desktop while you tune things in.</p>
+        <button id="open-theater" class="ghost-btn">Open theater mode</button>
+      </div>
+    </nav>
+
+    <main id="content">
+
+      <!-- ============================== VISUALIZER ============================== -->
+      <section class="tab active" id="tab-visualizer">
+        <h2>Visualizer</h2>
+        <p class="sub">All 10 are free - including the ones Weyv charges $9.99 for.</p>
+        <div id="vis-grid" class="vis-grid"></div>
+
+        <div class="field">
+          <label>Reactivity <span id="sens-val" class="val">1.0</span></label>
+          <input type="range" id="sens" min="0.2" max="3" step="0.1" />
+        </div>
+        <div class="field">
+          <label>Motion smoothing <span id="smooth-val" class="val">0.8</span></label>
+          <input type="range" id="smooth" min="0" max="0.95" step="0.05" />
+        </div>
+      </section>
+
+      <!-- ============================== THEME ============================== -->
+      <section class="tab" id="tab-theme">
+        <h2>Theme</h2>
+        <p class="sub">Pick a preset palette, or brew your own below.</p>
+        <div id="theme-grid" class="theme-grid"></div>
+
+        <div class="colors-row">
+          <div class="color-field">
+            <label>Primary</label>
+            <input type="color" id="c-primary" />
+          </div>
+          <div class="color-field">
+            <label>Secondary</label>
+            <input type="color" id="c-secondary" />
+          </div>
+          <div class="color-field">
+            <label>Accent</label>
+            <input type="color" id="c-accent" />
+          </div>
+          <div class="color-field">
+            <label>Background</label>
+            <input type="color" id="c-bg" />
+          </div>
+        </div>
+        <button id="reset-colors" class="ghost-btn">Use preset colors</button>
+      </section>
+
+      <!-- ============================== OVERLAYS ============================== -->
+      <section class="tab" id="tab-overlays">
+        <h2>Overlays</h2>
+        <p class="sub">Clock, now-playing card and the always-on-top lyrics.</p>
+
+        <h3>Desktop clock</h3>
+        <div class="row">
+          <label class="switch"><input type="checkbox" id="clock-enabled" /><span class="track"></span><span class="txt">Show clock</span></label>
+        </div>
+        <div class="row">
+          <label for="clock-style">Style</label>
+          <select id="clock-style">
+            <option value="digital">Digital</option>
+            <option value="analog">Analog</option>
+            <option value="minimal">Minimal</option>
+            <option value="words">Words</option>
+          </select>
+          <label for="clock-corner">Corner</label>
+          <select id="clock-corner">
+            <option value="top-left">Top left</option>
+            <option value="top-right">Top right</option>
+            <option value="bottom-left">Bottom left</option>
+            <option value="bottom-right">Bottom right</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="switch"><input type="checkbox" id="clock-24h" /><span class="track"></span><span class="txt">24-hour time</span></label>
+          <label class="switch"><input type="checkbox" id="clock-seconds" /><span class="track"></span><span class="txt">Seconds</span></label>
+        </div>
+
+        <h3>Now playing card</h3>
+        <div class="row">
+          <label class="switch"><input type="checkbox" id="card-enabled" /><span class="track"></span><span class="txt">Show card</span></label>
+        </div>
+        <div class="row">
+          <label for="card-layout">Layout</label>
+          <select id="card-layout">
+            <option value="card">Card (art + progress)</option>
+            <option value="minimal">Minimal</option>
+          </select>
+          <label for="card-corner">Corner</label>
+          <select id="card-corner">
+            <option value="top-left">Top left</option>
+            <option value="top-right">Top right</option>
+            <option value="bottom-left">Bottom left</option>
+            <option value="bottom-right">Bottom right</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="switch"><input type="checkbox" id="card-lyric" /><span class="track"></span><span class="txt">Show current lyric line under the card</span></label>
+        </div>
+
+        <h3>Lyrics overlay</h3>
+        <div class="row">
+          <label class="switch"><input type="checkbox" id="lyr-overlay" /><span class="track"></span><span class="txt">Float lyrics on top of every window</span></label>
+        </div>
+        <div class="row">
+          <label for="lyr-position">Position</label>
+          <select id="lyr-position">
+            <option value="bottom">Bottom of screen</option>
+            <option value="top">Top of screen</option>
+          </select>
+          <label for="lyr-size">Font size <span id="lyr-size-val" class="val">34</span></label>
+          <input type="range" id="lyr-size" min="16" max="72" step="2" />
+        </div>
+        <div class="row">
+          <label for="lyr-offset">Sync offset <span id="lyr-offset-val" class="val">0.0s</span></label>
+          <input type="range" id="lyr-offset" min="-5" max="5" step="0.1" />
+          <span class="hint">Nudge lyrics earlier or later if they drift from the song.</span>
+        </div>
+      </section>
+
+      <!-- ============================== AUDIO ============================== -->
+      <section class="tab" id="tab-audio">
+        <h2>Audio source</h2>
+        <p class="sub">How Freewave "hears" your music. System loopback needs no microphone.</p>
+
+        <div class="radio-card" data-audio="loopback">
+          <input type="radio" name="audio-source" id="src-loopback" value="loopback" />
+          <div>
+            <strong>System audio (recommended)</strong>
+            <p>Visualizes whatever plays through Windows - Spotify, YouTube in a browser, VLC, anything. This is the Weyv-style experience.</p>
+          </div>
+        </div>
+        <div class="radio-card" data-audio="mic">
+          <input type="radio" name="audio-source" id="src-mic" value="mic" />
+          <div>
+            <strong>Microphone</strong>
+            <p>Listen through your mic - useful for speakers, instruments or anything external.</p>
+          </div>
+        </div>
+        <div class="radio-card" data-audio="file">
+          <input type="radio" name="audio-source" id="src-file" value="file" />
+          <div>
+            <strong>Local audio file</strong>
+            <p>Play a single file on repeat and visualize it. Lyrics are looked up by its "Artist - Title" filename.</p>
+          </div>
+        </div>
+
+        <div class="row" id="file-row">
+          <button id="pick-file" class="ghost-btn">Choose audio file...</button>
+          <span id="file-name" class="file-name">No file chosen</span>
+        </div>
+
+        <h3>Audio diagnostics</h3>
+        <div class="meter-wrap">
+          <div id="meter"><div id="meter-fill"></div></div>
+          <div class="meter-info">
+            <span id="audio-mode">not connected</span>
+            <span id="audio-signal"></span>
+          </div>
+        </div>
+        <div class="row">
+          <button id="reconnect" class="ghost-btn">Reconnect audio</button>
+          <button id="toggle-playback" class="ghost-btn">Play / Pause music</button>
+        </div>
+        <p class="hint">If visuals stay flat: make sure music is actually playing, then press Reconnect audio. Windows may show a capture permission prompt the first time.</p>
+      </section>
+
+      <!-- ============================== GENERAL ============================== -->
+      <section class="tab" id="tab-general">
+        <h2>General</h2>
+        <p class="sub">Small switches that make Freewave feel native.</p>
+
+        <div class="row">
+          <label class="switch"><input type="checkbox" id="wallpaper-mode" /><span class="track"></span><span class="txt">Visualizer as wallpaper (behind desktop icons)</span></label>
+        </div>
+        <div class="row">
+          <label class="switch"><input type="checkbox" id="autostart" /><span class="track"></span><span class="txt">Start with Windows</span></label>
+        </div>
+
+        <h3>Shortcuts</h3>
+        <div class="row keys">
+          <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>F</kbd><span>toggle theater mode</span>
+          <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>L</kbd><span>toggle lyrics overlay</span>
+        </div>
+        <p class="hint">Lyrics can be repositioned via the tray icon: "Unlock lyrics (drag)".</p>
+
+        <h3>About</h3>
+        <p class="about">
+          Freewave v1.0.0 - a completely free, MIT-licensed desktop music visualizer.<br />
+          Inspired by Weyv, but with every visualizer unlocked, $0 forever.<br />
+          Lyrics by <a href="#" data-url="https://lrclib.net">LRCLIB</a> - artwork via the iTunes Search API - built with Electron.
+        </p>
+        <button id="quit-btn" class="danger-btn">Quit Freewave</button>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="../common/themes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{
+  "name": "freewave",
+  "productName": "Freewave",
+  "version": "1.0.1",
+  "description": "A completely free desktop music visualizer — live visuals behind your desktop icons, Spotify now-playing, synced lyrics on top of your screen. Weyv concept, zero paywalls.",
+  "main": "main/main.js",
+  "author": "Freewave Project",
+  "license": "MIT",
+  "homepage": "https://github.com/freewave-desktop/freewave",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis portable",
+    "dist:installer": "electron-builder --win nsis",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "koffi": "^2.8.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^26.18.1"
+  },
+  "build": {
+    "appId": "app.freewave.desktop",
+    "productName": "Freewave",
+    "copyright": "Copyright © 2026 Freewave Project (MIT)",
+    "files": [
+      "main/**/*",
+      "renderer/**/*",
+      "scripts/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "artifactName": "Freewave-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Freewave"
+    },
+    "portable": {
+      "artifactName": "Freewave-Portable-${version}.${ext}"
+    },
+    "toolsets": {
+      "wine": "1.0.1"
+    }
+  }
+}

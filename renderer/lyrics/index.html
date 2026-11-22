@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' file: data:; script-src 'self'" />
+  <title>Freewave Lyrics</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      background: transparent;
+      overflow: hidden;
+      font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+      user-select: none;
+    }
+    body.locked { pointer-events: none; }
+    body.unlocked { pointer-events: auto; cursor: move; }
+    body.unlocked .lyrics { outline: 1px dashed rgba(255, 47, 214, 0.6); border-radius: 16px; }
+
+    .lyrics {
+      -webkit-app-region: drag;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 30px;
+    }
+    body:not(.unlocked) .lyrics { -webkit-app-region: no-drag; }
+
+    .lyric-current {
+      font-weight: 700;
+      font-size: 34px;
+      line-height: 1.15;
+      text-align: center;
+      color: #f4ecff;
+      text-shadow: 0 0 22px rgba(255, 47, 214, 0.75), 0 2px 8px rgba(0, 0, 0, 0.85);
+      transition: opacity 0.25s ease;
+    }
+    .lyric-next {
+      font-weight: 400;
+      font-size: 20px;
+      text-align: center;
+      color: rgba(47, 233, 255, 0.62);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+      max-width: 860px;
+    }
+    .lyric-meta {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255, 225, 77, 0.8);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    }
+    .lyric-none {
+      font-size: 18px;
+      color: rgba(244, 236, 255, 0.55);
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    }
+    body.paused .lyric-current { opacity: 0.45; }
+    .empty { visibility: hidden; }
+  </style>
+</head>
+<body class="locked">
+  <div class="lyrics">
+    <div id="lyric-meta" class="lyric-meta empty">Freewave</div>
+    <div id="lyric-current" class="lyric-current empty">&nbsp;</div>
+    <div id="lyric-next" class="lyric-next empty">&nbsp;</div>
+  </div>
+  <script src="../common/lyric-sync.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
