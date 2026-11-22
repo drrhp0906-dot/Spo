@@ -67,15 +67,32 @@ const AudioManager = (() => {
     teardownSource();
     lastError = null;
     try {
+      // Ask for screen + system-audio loopback. The main process auto-grants
+      // this request via setDisplayMediaRequestHandler and pins
+      // `audio: 'loopback'`, which on Windows captures WASAPI loopback of the
+      // default render device — no picker, no shared "screen" source. That is
+      // essential here: the wallpaper window lives inside the desktop's own
+      // WorkerW layer, so asking Windows to share that screen for capture can
+      // fail outright (or return an audio-less stream) on some setups.
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+        video: {
+          cursor: 'never',
+          chromeMediaSource: 'desktop',
+          mandatory: { chromeMediaSource: 'desktop' }
+        },
+        audio: {
+          mandatory: {
+            chromeMediaSource: 'desktop',
+            chromeMediaSourceId: 'loopback'
+          }
+        }
       });
       // We only need the audio track; drop the video one immediately.
       stream.getVideoTracks().forEach((t) => { try { t.stop(); } catch {} });
       if (!stream.getAudioTracks().length) {
         throw new Error('NO_SYSTEM_AUDIO');
       }
+      ensureCtx();
       const src = ctx.createMediaStreamSource(stream);
       wire(src);
       mode = 'loopback';
